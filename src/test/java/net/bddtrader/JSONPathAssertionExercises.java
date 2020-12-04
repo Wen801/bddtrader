@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static io.restassured.RestAssured.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
@@ -14,7 +15,7 @@ public class JSONPathAssertionExercises {
 
     @Before
     public void prepare_rest_config() {
-        RestAssured.baseURI = "https://bddtrader.herokuapp.com/api";
+        baseURI = "https://bddtrader.herokuapp.com/api";
     }
 
     /**
@@ -24,6 +25,8 @@ public class JSONPathAssertionExercises {
      */
     @Test
     public void find_a_simple_field_value() {
+        given().when().get("/stock/{stockid}/company","aapl")
+                .then().body("industry", equalTo("Telecommunications Equipment"));
     }
 
     /**
@@ -33,8 +36,9 @@ public class JSONPathAssertionExercises {
      */
     @Test
     public void check_that_a_field_value_contains_a_given_string() {
+        given().when().get("/stock/{stockid}/company","aapl")
+                .then().body("description", containsString("smartphones"));
     }
-
 
     /**
      * Exercise 3 - Read a single nested field value
@@ -43,8 +47,9 @@ public class JSONPathAssertionExercises {
      */
     @Test
     public void find_a_nested_field_value() {
+       given().when().get("/stock/{stockid}/book","aapl")
+                .then().body("quote.symbol", equalTo("AAPL"));
     }
-
 
     /**
      * Exercise 4 - Find a list of values
@@ -53,6 +58,8 @@ public class JSONPathAssertionExercises {
      */
     @Test
     public void find_a_list_of_values() {
+        given().when().get("/tops/last")
+                .then().body("symbol", hasItems("PTN", "PINE","TRS"));
     }
 
     /**
@@ -61,6 +68,11 @@ public class JSONPathAssertionExercises {
      */
     @Test
     public void make_sure_at_least_one_item_matches_a_given_condition() {
+        given().when().get("/tops/last")
+                .then().body("findAll{it->it.price>100}.size()", greaterThan(0));
+
+//        then().body("price", hasItems(greaterThan(100.0f)));
+
     }
 
     /**
@@ -69,14 +81,18 @@ public class JSONPathAssertionExercises {
      */
     @Test
     public void find_a_field_of_an_element_in_a_list() {
+        given().when().get("/stock/{stockid}/book","aapl")
+                .then().body("trades[0].price", equalTo(319.59f));
     }
 
     /**
      * Exercise 7 - check the value of a specific item in a list
-     * Check that price of the first trade in the Apple stock book is 319.54
+     * Check that price of the last trade in the Apple stock book is 319.54
      */
     @Test
     public void find_a_field_of_the_last_element_in_a_list() {
+        given().when().get("/stock/{stockid}/book", "aapl")
+                .then().body("trades[-1].price",equalTo(319.54f));
     }
 
     /**
@@ -85,6 +101,9 @@ public class JSONPathAssertionExercises {
      */
     @Test
     public void find_the_number_of_trades() {
+        given().when().get("/stock/{stockid}/book", "aapl")
+                .then().body("trades.size()",equalTo(20));
+
     }
 
     /**
@@ -93,7 +112,8 @@ public class JSONPathAssertionExercises {
      */
     @Test
     public void find_the_minimum_trade_price() {
-
+        given().when().get("/stock/{stockid}/book", "aapl")
+                .then().body("trades.price.min()",equalTo(319.38f));
     }
 
     /**
@@ -102,6 +122,8 @@ public class JSONPathAssertionExercises {
      */
     @Test
     public void find_the_size_of_the_trade_with_the_minimum_trade_price() {
+        given().when().get("/stock/{stockid}/book", "aapl")
+                .then().body("trades.min{it->it.price}.volume",equalTo(100f));
     }
 
     /**
@@ -110,6 +132,8 @@ public class JSONPathAssertionExercises {
      */
     @Test
     public void find_the_number_of_trades_with_a_price_greater_than_some_value() {
+        given().when().get("/stock/{stockid}/book", "aapl")
+                .then().body("trades.findAll{it->it.price>319.50}.size()",equalTo(13));
     }
 
 }
