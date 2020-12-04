@@ -28,6 +28,7 @@ public class WhenCreatingANewClient {
         clientData.put("lastName","Scott");
 
         RestAssured.given()
+                .auth().basic("user","password")
                 .contentType(ContentType.JSON)
                 .body(clientData)
                 .when()
@@ -48,6 +49,7 @@ public class WhenCreatingANewClient {
         clientData.put("lastName","Malone");
 
         RestAssured.given()
+                .auth().digest("user","password")
                 .contentType(ContentType.JSON)
                 .body(clientData)
                 .when()
